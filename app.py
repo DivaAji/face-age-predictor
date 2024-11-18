@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
 import cv2
 import numpy as np
 import joblib
@@ -12,31 +12,29 @@ model = joblib.load(model_path)
 # Function to extract LBP features
 def extract_lbp_features(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-    image = cv2.resize(image, (128, 128))
-    lbp = cv2.calcHist([image], [0], None, [256], [0, 256])
-    return lbp.flatten()
-
-# Routes
-@app.route('/')
-def home():
-    return render_template('index.html')
+    image = cv2.resize(image, (128, 128))  # Resize to match model input size
+    lbp = cv2.calcHist([image], [0], None, [256], [0, 256])  # Calculate LBP histogram
+    lbp_features = lbp.flatten()
+    return lbp_features  # Select the first 50 features
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    file = request.files['file']
-    if file:
-        # Save uploaded file temporarily
-        file_path = 'temp_uploaded_image.jpg'
-        file.save(file_path)
+    image_file = request.files['image']
+    image_path = 'temp_image.jpg'
+    image_file.save(image_path)
 
-        # Extract features and predict age
-        features = extract_lbp_features(file_path)
-        predicted_age = model.predict([features])[0]
+    # Ekstraksi fitur LBP
+    features = extract_lbp_features(image_path)
+    
+    # Prediksi usia menggunakan model SVM
+    predicted_age = model.predict([features])[0]  # Mengambil prediksi usia
+    
+    # Pastikan prediksi usia dalam format int
+    predicted_age = int(predicted_age)  # Konversi ke tipe data int jika perlu
 
-        # Return result in the UI
-        return render_template('index.html', prediction=predicted_age)
-    else:
-        return "No file uploaded!", 400
+    # Kembalikan prediksi usia dalam format JSON
+    return jsonify({'predicted_age': predicted_age})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
