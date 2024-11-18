@@ -8,14 +8,6 @@ import joblib
 from tqdm import tqdm
 import multiprocessing
 from sklearn.svm import LinearSVC
-from sklearn.decomposition import PCA
-
-# Terapkan PCA setelah ekstraksi fitur LBP
-def reduce_dimensionality(X_train, X_test):
-    pca = PCA(n_components=50)  # Mengurangi menjadi 50 komponen
-    X_train = pca.fit_transform(X_train)
-    X_test = pca.transform(X_test)
-    return X_train, X_test
 
 # Fungsi untuk ekstraksi fitur LBP
 def extract_lbp_features(image_path):
@@ -62,12 +54,10 @@ if __name__ == "__main__":
     print("Membagi dataset...")
     X_train, X_test, y_train, y_test = train_test_split(X_features, y_labels, test_size=0.2, random_state=42)
     print("Dataset berhasil dibagi.")
-    # Setelah load dataset dan pembagian data
-    X_train, X_test = reduce_dimensionality(X_train, X_test)
+    
     # Latih model SVM
     print("Melatih model SVM...")
-    model = LinearSVC(dual='auto')
-  # Kernel linear untuk efisiensi
+    model = LinearSVC(dual='auto')  # Kernel linear untuk efisiensi
     model.fit(X_train, y_train)
     print("Model berhasil dilatih.")
 
