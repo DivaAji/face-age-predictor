@@ -1,0 +1,5 @@
+Flask==2.3.3
+opencv-python==4.8.0.76  # atau opencv-python==4.7.0.68
+numpy==1.26.0
+scikit-learn==1.3.0
+joblib==1.3.2
